@@ -1,0 +1,97 @@
+<?php
+include_once('./auth/process_admin.php');
+$title = 'Edit Admin Profile';
+include_once('./auth/session.php');
+include_once('./includes/header.php');
+include_once('./includes/navbar.php');
+
+$id = $_GET['id'];
+$msg = '';
+
+if (isset($_POST['update'])) {
+    $bio = $_POST["bio"];
+    $filename = $_FILES["image"]["name"];
+    $tempname = $_FILES["image"]["tmp_name"];
+    $folder = "uploads/" . $filename;
+    $sql = "UPDATE  admin_profile SET bio='$bio', image='$folder' WHERE id='$id' ";
+    $result = $conn->query($sql);
+     if ($result === TRUE) {
+        if (move_uploaded_file($tempname, $folder)) {
+            $msg = "<div class='alert alert-success'>Details Updated successfully</div>";
+        } else {
+            die(mysqli_error($conn));
+            $msg = "<div class='alert alert-danger'>Failed to upload image</div>";
+        }
+    }
+}
+
+
+?>
+
+<div class="container m-5">
+
+    <!-- row -->
+    <div class="row ">
+        <div class="container">
+            <div class="container-fluid tm-bg-primary-dark  tm-block tm-block-taller tm-block-scroll">
+                <div class="col-12 tm-block-col">
+
+                    <section class="panel">
+
+                        <header class="panel-heading">
+                            <?php print $msg; ?>
+                        </header>
+                        <?php
+                        $sql = "SELECT * from admin_profile where id='$id' ";
+                        $result = mysqli_query($conn, $sql);
+                        if (mysqli_num_rows($result) > 0) {
+                            $i = 1;
+
+                            while ($row = mysqli_fetch_assoc($result)) {
+
+
+                        ?>
+
+                                <div class="panel-body">
+                                    <form action="<?php $_SERVER['PHP_SELF']; ?>" class="form-horizontal" role="form" method="post" enctype="multipart/form-data">
+
+
+                                        <div class="form-group">
+                                            <label for="inputPassword1" class="col-lg-2 control-label">Bio </label>
+                                            <div class="col-lg-10">
+                                                <textarea type="text" class="form-control" style="height:120px" name="bio" required><?php print $row['bio']; ?></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputPassword1" class="col-lg-2 control-label">Image</label>
+                                            <div class="col-lg-10">
+                                                <input type="file" class="form-control" value="<?php print $row['image']; ?>" name="image" required>
+                                            </div>
+                                        </div>
+                                <?php }
+                        } ?>
+
+
+                                <div class="form-group">
+                                    <div class="col-lg-offset-2 col-lg-10">
+                                        <button type="submit" class="btn btn-danger" name="update">Update</button>
+                                    </div>
+                                </div>
+                                    </form>
+                                </div>
+                    </section>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<?php
+include_once('./includes/footer.php');
+include_once('./includes/scripts.php');
+
+
+
+?>
